@@ -14,10 +14,14 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework import routers
 from octofit_tracker import views
+from django.http import JsonResponse
+import os
+
 
 
 router = routers.DefaultRouter()
@@ -27,7 +31,15 @@ router.register(r'activities', views.ActivityViewSet)
 router.register(r'workouts', views.WorkoutViewSet)
 router.register(r'leaderboards', views.LeaderboardViewSet)
 
+# Root API endpoint returns the codespace URL
+def api_root(request):
+    codespace_name = os.environ.get('CODESPACE_NAME', 'localhost')
+    url = f'https://{codespace_name}-8000.app.github.dev/api/' if codespace_name != 'localhost' else 'http://localhost:8000/api/'
+    return JsonResponse({'api_url': url})
+
+
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/', include(router.urls)),
+    path('', api_root),
 ]
